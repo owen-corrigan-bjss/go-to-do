@@ -19,6 +19,27 @@ func PrintJsonToDos(toDos ...toDos.ToDoJson) string {
 	return toDoStr
 }
 
+func OpenAndPrintJson() {
+	toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer toDoJson.Close()
+	decodedJson := helpers.DecodeJson(toDoJson)
+	PrintJsonToDos(decodedJson...)
+}
+
+func CreateAndPrintJson() {
+	newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer newToDoJson.Close()
+	CreateNewJsonFile()
+	decodedJson := helpers.DecodeJson(newToDoJson)
+	PrintJsonToDos(decodedJson...)
+}
+
 func PrintToDosList(toDos ...toDos.ToDo) string {
 	toDoStr := "Here are your todo's:\n"
 	for i, v := range toDos {
@@ -76,25 +97,11 @@ func main() {
 		if input == "0" {
 			breakLoop = true
 		} else if input == "1" {
-			toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			defer toDoJson.Close()
-			decodedJson := helpers.DecodeJson(toDoJson)
-			PrintJsonToDos(decodedJson...)
+			OpenAndPrintJson()
 		} else if input == "2" {
 			PrintToDosList(toDos.ToDoList...)
 		} else if input == "3" {
-			newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
-			if err != nil {
-				log.Fatal(err)
-			}
-			defer newToDoJson.Close()
-			CreateNewJsonFile()
-			decodedJson := helpers.DecodeJson(newToDoJson)
-			PrintJsonToDos(decodedJson...)
+			CreateAndPrintJson()
 		}
 	}
 }
