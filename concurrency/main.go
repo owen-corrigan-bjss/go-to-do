@@ -41,9 +41,6 @@ func main() {
 	// for i := 0; i <= 10; i++ {
 	// 	go addOddNum(&num)
 	// 	go addEvenNum(&num)
-
-	// 	// go func() { num <- 1 }()
-	// 	// go func() { num <- 2 }()
 	// 	time.NewTimer(4 * time.Second)
 	// }
 
