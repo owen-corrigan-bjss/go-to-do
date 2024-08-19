@@ -17,17 +17,21 @@ func addEvenNum(num *int) {
 	fmt.Println("even")
 }
 
-func addOddNumChans(num chan int) {
+func addOddNumChans(num chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
 	v := <-num
 	v += 3
 	fmt.Println(v)
+	fmt.Println("odd")
 	num <- v
 }
 
-func addEvenNumChans(num chan int) {
+func addEvenNumChans(num chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
 	v := <-num
 	v += 2
 	fmt.Println(v)
+	fmt.Println("even")
 	num <- v
 }
 
@@ -50,23 +54,9 @@ func main() {
 	defer close(numChan)
 	for i := 0; i <= 10; i++ {
 		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			v := <-numChan
-			v += 2
-			fmt.Println(v)
-			fmt.Println("even")
-			numChan <- v
-		}()
+		go addOddNumChans(numChan, &wg)
 		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			v := <-numChan
-			v += 3
-			fmt.Println(v)
-			fmt.Println("odd")
-			numChan <- v
-		}()
+		go addEvenNumChans(numChan, &wg)
 	}
 	wg.Wait()
 }
