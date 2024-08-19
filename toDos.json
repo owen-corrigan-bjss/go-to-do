@@ -1,0 +1,44 @@
+{
+    "toDos": [
+        {
+            "description": "This is from the JSON file",
+            "complete": false
+        },
+        {
+            "description": "test it",
+            "complete": false
+        },
+        {
+            "description": "refactor it",
+            "complete": false
+        },
+        {
+            "description": "add more stuff",
+            "complete": false
+        },
+        {
+            "description": "write 5 more todos",
+            "complete": false
+        },
+        {
+            "description": "create a server",
+            "complete": false
+        },
+        {
+            "description": "create endpoints",
+            "complete": false
+        },
+        {
+            "description": "integrate it with this",
+            "complete": false
+        },
+        {
+            "description": "do some more stuff",
+            "complete": false
+        },
+        {
+            "description": "write more tests",
+            "complete": false
+        }
+    ]
+}
