@@ -9,6 +9,10 @@ func NewToDo() *ToDo {
 	return &ToDo{}
 }
 
+type ToDoListForConvert struct {
+	ToDos []ToDo
+}
+
 type ToDoListJson struct {
 	ToDos []ToDoJson `json:"toDos"`
 }
