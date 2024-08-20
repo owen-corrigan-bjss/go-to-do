@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	toDos "to-do-app"
+	toDos "to-do-app/part-1-exercises"
 )
 
 func DecodeJson(osFile *os.File) []toDos.ToDoJson {

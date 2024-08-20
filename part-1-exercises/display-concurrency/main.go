@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"sync"
-	toDos "to-do-app"
+	toDos "to-do-app/part-1-exercises"
 )
 
 var fp = fmt.Printf
 
-type lockedToDo struct {
+type LockedToDo struct {
 	toDos []toDos.ToDo
 	lock  sync.Mutex
 }
@@ -26,27 +26,28 @@ var list []toDos.ToDo = []toDos.ToDo{
 	{Description: "here is task 10", Complete: true},
 }
 
-func ReadToDoDesc(toDoStruct *lockedToDo, index int, wg *sync.WaitGroup) {
-	fp("task %d desc: %s\n", index, toDoStruct.toDos[index].Description)
-	wg.Done()
+func ReadToDoDesc(toDoStruct *LockedToDo, index int, done chan bool) {
+	fp("task %d desc: %s\n", index+1, toDoStruct.toDos[index].Description)
+	done <- true
 }
 
-func ReadToDoStatus(toDoStruct *lockedToDo, index int, wg *sync.WaitGroup) {
-	fp("task %d status: %v\n", index, toDoStruct.toDos[index].Complete)
-	wg.Done()
+func ReadToDoStatus(toDoStruct *LockedToDo, index int, done chan bool) {
+	fp("task %d status: %v\n", index+1, toDoStruct.toDos[index].Complete)
+	done <- true
 }
 
 func main() {
-	var toDoList lockedToDo
+	var toDoList LockedToDo
 	toDoList.toDos = list
-	var wg sync.WaitGroup
+	done := make(chan bool)
+
 	for i := 0; i < 10; i++ {
-		wg.Add(2)
+		// I'm fairly sure the mutex is adding nothing to this.
 		toDoList.lock.Lock()
-		go ReadToDoDesc(&toDoList, i, &wg)
-		go ReadToDoStatus(&toDoList, i, &wg)
+		go ReadToDoDesc(&toDoList, i, done)
+		<-done
+		go ReadToDoStatus(&toDoList, i, done)
+		<-done
 		toDoList.lock.Unlock()
 	}
-
-	wg.Wait()
 }

@@ -4,13 +4,13 @@ import (
 	"log"
 	"os"
 	"testing"
-	toDos "to-do-app"
-	"to-do-app/helpers"
+	toDos "to-do-app/part-1-exercises"
+	"to-do-app/part-1-exercises/helpers"
 )
 
 func TestMainFunctions(t *testing.T) {
 	t.Run("printJsonToDos", func(t *testing.T) {
-		toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
+		toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/toDos.json")
 		if err != nil {
 			log.Fatal(err)
 		}
