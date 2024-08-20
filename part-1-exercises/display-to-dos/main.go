@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	toDos "to-do-app"
-	"to-do-app/helpers"
+	toDos "to-do-app/part-1-exercises"
+	"to-do-app/part-1-exercises/helpers"
 )
 
 func PrintJsonToDos(toDos ...toDos.ToDoJson) string {
@@ -30,7 +30,7 @@ func OpenAndPrintJson() {
 }
 
 func CreateAndPrintJson() {
-	newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
+	newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/toDos.json")
 	if err != nil {
 		log.Fatal(err)
 	}

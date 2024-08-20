@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 	"testing"
-	toDos "to-do-app"
-	"to-do-app/helpers"
+	toDos "to-do-app/part-1-exercises"
+	"to-do-app/part-1-exercises/helpers"
 )
 
 func TestMainFunctions(t *testing.T) {

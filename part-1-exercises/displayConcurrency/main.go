@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
-	toDos "to-do-app"
+	toDos "to-do-app/part-1-exercises"
 )
 
 var fp = fmt.Printf
