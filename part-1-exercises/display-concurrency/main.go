@@ -6,7 +6,7 @@ import (
 	toDos "to-do-app/part-1-exercises"
 )
 
-var fp = fmt.Sprintf
+var fp = fmt.Printf
 
 type LockedToDo struct {
 	toDos []toDos.ToDo
@@ -27,12 +27,12 @@ var list []toDos.ToDo = []toDos.ToDo{
 }
 
 func ReadToDoDesc(toDoStruct *LockedToDo, index int, done chan bool) {
-	fp("task %d desc: %s\n", index, toDoStruct.toDos[index].Description)
+	fp("task %d desc: %s\n", index+1, toDoStruct.toDos[index].Description)
 	done <- true
 }
 
 func ReadToDoStatus(toDoStruct *LockedToDo, index int, done chan bool) {
-	fp("task %d status: %v\n", index, toDoStruct.toDos[index].Complete)
+	fp("task %d status: %v\n", index+1, toDoStruct.toDos[index].Complete)
 	done <- true
 }
 

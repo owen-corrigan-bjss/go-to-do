@@ -20,7 +20,7 @@ func PrintJsonToDos(toDos ...toDos.ToDoJson) string {
 }
 
 func OpenAndPrintJson() {
-	toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/toDos.json")
+	toDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/toDos.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,12 +30,12 @@ func OpenAndPrintJson() {
 }
 
 func CreateAndPrintJson() {
-	newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/toDos.json")
+	CreateNewJsonFile()
+	newToDoJson, err := os.Open("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/display-to-dos/newToDos.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer newToDoJson.Close()
-	CreateNewJsonFile()
 	decodedJson := helpers.DecodeJson(newToDoJson)
 	PrintJsonToDos(decodedJson...)
 }
@@ -57,7 +57,7 @@ func CreateNewJsonFile() {
 		toDosForJson = append(toDosForJson, newToDo)
 	}
 
-	file, err := os.Create("/Users/owen.corrigan/projects/go-to-do/display-to-dos/newToDos.json")
+	file, err := os.Create("/Users/owen.corrigan/projects/go-to-do/part-1-exercises/display-to-dos/newToDos.json")
 
 	if err != nil {
 		log.Fatal(err)
