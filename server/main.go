@@ -5,7 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 )
+
+type ToDo struct {
+	description string
+	completed   bool
+	lock        sync.Mutex
+}
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -22,7 +29,6 @@ func handleGetHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", helloHandler)
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
