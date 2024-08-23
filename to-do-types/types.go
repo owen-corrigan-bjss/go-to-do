@@ -8,8 +8,8 @@ import (
 )
 
 type ToDo struct {
-	description string
-	completed   bool
+	Description string
+	Completed   bool
 }
 
 type ToDoList map[string]ToDo
@@ -33,19 +33,35 @@ func (list *ToDoListContainer) ListToDos() string {
 		toDoListToPrint = "\nthere are currently no items in your list\n"
 	}
 	for i, v := range list.list {
-		toDoListToPrint += fmt.Sprintf("id: %s desc: %s : complete: %t\n", i, v.description, v.completed)
+		toDoListToPrint += fmt.Sprintf("id: %s desc: %s : complete: %t\n", i, v.Description, v.Completed)
 	}
 	return toDoListToPrint
 }
 
-func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCounter) {
+func (list *ToDoListContainer) GetSingleToDo(id string) ToDo {
+	return list.list[id]
+}
+
+func (list *ToDoListContainer) GetToDoMap() ToDoList {
+	return list.list
+}
+
+func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCounter) (string, error) {
 	list.lock.Lock()
+	defer list.lock.Unlock()
 
 	key := counter.GetNewId()
 
 	list.list[key] = ToDo{description, false}
 
-	list.lock.Unlock()
+	_, ok := list.list[key]
+
+	if !ok {
+		return "", errors.New("item not created")
+	}
+
+	return key, nil
+
 }
 
 func (list *ToDoListContainer) UpdateToDoItemStatus(id string) error {
@@ -57,7 +73,7 @@ func (list *ToDoListContainer) UpdateToDoItemStatus(id string) error {
 		return errors.New("item doesn't exist")
 	}
 
-	itemToUpdate.completed = !itemToUpdate.completed
+	itemToUpdate.Completed = !itemToUpdate.Completed
 
 	list.list[id] = itemToUpdate
 

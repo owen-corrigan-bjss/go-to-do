@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	handlers "to-do-app/server/handlers"
 )
 
 type ToDo struct {
@@ -29,6 +30,7 @@ func handleGetHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	handlers.Handlers()
 	fmt.Println("Server is running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

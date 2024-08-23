@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	types "to-do-app/cli-app/to-do-types"
+	"to-do-app/to-do-types"
 )
 
 var fp = fmt.Printf
