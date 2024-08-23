@@ -58,7 +58,7 @@ func TestUpdateToDoItemStatus(t *testing.T) {
 		toDos.list["1"] = ToDo{"a to do", false}
 		toDos.UpdateToDoItemStatus("1")
 
-		got := toDos.list["1"].completed
+		got := toDos.list["1"].Completed
 		want := true
 
 		if got != want {
@@ -71,7 +71,7 @@ func TestUpdateToDoItemStatus(t *testing.T) {
 		toDos.list["1"] = ToDo{"a to do", false}
 		toDos.UpdateToDoItemStatus("1")
 
-		got := toDos.list["1"].completed
+		got := toDos.list["1"].Completed
 		want := true
 
 		if got != want {
@@ -79,7 +79,7 @@ func TestUpdateToDoItemStatus(t *testing.T) {
 		}
 		toDos.UpdateToDoItemStatus("1")
 
-		got = toDos.list["1"].completed
+		got = toDos.list["1"].Completed
 		want = false
 
 		if got != want {
