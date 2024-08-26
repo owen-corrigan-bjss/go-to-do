@@ -46,7 +46,7 @@ func (list *ToDoListContainer) GetToDoMap() ToDoList {
 	return list.list
 }
 
-func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCounter) (string, error) {
+func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCounter) string {
 	list.lock.Lock()
 	defer list.lock.Unlock()
 
@@ -54,13 +54,7 @@ func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCou
 
 	list.list[key] = ToDo{description, false}
 
-	_, ok := list.list[key]
-
-	if !ok {
-		return "", errors.New("item not created")
-	}
-
-	return key, nil
+	return key
 
 }
 

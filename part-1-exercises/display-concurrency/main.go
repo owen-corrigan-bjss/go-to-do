@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	toDos "github.com/owen-corrigan-bjss/to-do-app/part-1-exercises"
 	"sync"
-	toDos "to-do-app/part-1-exercises"
 )
 
 var fp = fmt.Printf

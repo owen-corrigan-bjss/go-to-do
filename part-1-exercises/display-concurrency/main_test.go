@@ -1,8 +1,8 @@
 package main
 
 import (
+	toDos "github.com/owen-corrigan-bjss/to-do-app/part-1-exercises"
 	"testing"
-	toDos "to-do-app/part-1-exercises"
 )
 
 func BenchmarkReadToDoDesc(b *testing.B) {
