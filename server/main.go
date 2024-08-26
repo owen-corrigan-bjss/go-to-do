@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	handlers "github.com/owen-corrigan-bjss/to-do-app/server/handlers"
 	"log"
 	"net/http"
-	handlers "to-do-app/server/handlers"
 )
 
 func main() {

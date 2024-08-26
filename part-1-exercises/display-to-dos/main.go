@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	toDos "github.com/owen-corrigan-bjss/to-do-app/part-1-exercises"
+	"github.com/owen-corrigan-bjss/to-do-app/part-1-exercises/helpers"
 	"log"
 	"os"
-	toDos "to-do-app/part-1-exercises"
-	"to-do-app/part-1-exercises/helpers"
 )
 
 func PrintJsonToDos(toDos ...toDos.ToDoJson) string {

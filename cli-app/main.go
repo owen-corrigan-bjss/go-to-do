@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"to-do-app/to-do-types"
+
+	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
 )
 
 var fp = fmt.Printf
