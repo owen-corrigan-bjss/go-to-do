@@ -2,12 +2,22 @@ package handlers
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
 )
+
+func assertStatus(t testing.TB, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("Status Incorrect, got %d, want %d", got, want)
+	}
+}
 
 func TestHandleCreateNewToDo(t *testing.T) {
 	t.Run("Creates a new todo and returns the newly created item", func(t *testing.T) {
@@ -19,10 +29,18 @@ func TestHandleCreateNewToDo(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
 		HandleCreateNewToDo(got, req)
-		want := 201
-		if got.Code != want {
-			t.Errorf("wanted %d got %v", want, got.Code)
+
+		assertStatus(t, got.Code, 201)
+
+		var responseBody ToDoResponse
+		json.NewDecoder(got.Body).Decode(&responseBody)
+
+		wantBody := ToDoResponse{"0", "a test task", false}
+
+		if !reflect.DeepEqual(responseBody, wantBody) {
+			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
 		}
+
 	})
 	t.Run("if there is no description will return a 400", func(t *testing.T) {
 		validData := []byte(`{"description": ""}`)
@@ -30,10 +48,8 @@ func TestHandleCreateNewToDo(t *testing.T) {
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
 		HandleCreateNewToDo(got, req)
-		want := 400
-		if got.Code != want {
-			t.Errorf("wanted %d got %v", want, got.Code)
-		}
+
+		assertStatus(t, got.Code, 400)
 	})
 }
 
@@ -47,9 +63,7 @@ func TestHandleUpdateToDo(t *testing.T) {
 		got := httptest.NewRecorder()
 		HandleUpdateToDo(got, req)
 
-		if got.Code != 200 {
-			t.Errorf("wanted %d for %d", 200, got.Code)
-		}
+		assertStatus(t, got.Code, 200)
 
 		updatedItemStatus := inMemoryToDoList.GetSingleToDo("0").Completed
 
@@ -63,16 +77,7 @@ func TestHandleUpdateToDo(t *testing.T) {
 		got := httptest.NewRecorder()
 		HandleUpdateToDo(got, req)
 
-		if got.Code != 400 {
-			t.Errorf("wanted %d for %d", 400, got.Code)
-		}
-
-		// var bodyString string
-		// json.Unmarshal(got.Body.Bytes(), &bodyString)
-
-		// if bodyString != "item doesn't exist" {
-		// 	t.Errorf("wanted %s got %s", got.Body.String(), "item doesn't exist")
-		// }
+		assertStatus(t, got.Code, 400)
 	})
 }
 
@@ -86,9 +91,7 @@ func TestHandleDeleteToDo(t *testing.T) {
 		got := httptest.NewRecorder()
 		HandleDeleteToDo(got, req)
 
-		if got.Code != 200 {
-			t.Errorf("wanted %d for %d", 200, got.Code)
-		}
+		assertStatus(t, got.Code, 200)
 	})
 	t.Run("will return an error if the item doesn't exist", func(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "/update?id=10", nil)
@@ -96,51 +99,52 @@ func TestHandleDeleteToDo(t *testing.T) {
 		got := httptest.NewRecorder()
 		HandleDeleteToDo(got, req)
 
-		if got.Code != 400 {
-			t.Errorf("wanted %d for %d", 400, got.Code)
-		}
-
-		// if got.Body.String() != "item doesn't exist" {
-		// 	t.Errorf("wanted %s got %s", got.Body.String(), "item doesn't exist")
-		// }
+		assertStatus(t, got.Code, 400)
 	})
 }
 
-// func TestHandleListToDos(t *testing.T) {
-// 	t.Run("If there is nothing in the list returns an empty list", func(t *testing.T) {
-// 		request, _ := http.NewRequest("GET", "/todos", nil)
+func TestHandleListToDos(t *testing.T) {
+	t.Run("If there is nothing in the list returns an empty list", func(t *testing.T) {
+		request, _ := http.NewRequest("GET", "/todos", nil)
 
-// 		request.Header.Set("Content-Type", "application/json")
-// 		response := httptest.NewRecorder()
-// 		HandleListToDos(response, request)
-// 		want := 200
-// 		if response.Code != want {
-// 			t.Errorf("wanted %d got %v", want, response.Code)
-// 		}
-// 		//comparison not working
-// 		if response.Body.String() != "{}" {
-// 			t.Errorf("wanted %s got %s", "{}", response.Body.String())
-// 		}
-// 	})
+		request.Header.Set("Content-Type", "application/json")
+		got := httptest.NewRecorder()
+		HandleListToDos(got, request)
 
-// 	t.Run("returns the list", func(t *testing.T) {
+		assertStatus(t, got.Code, 200)
 
-// 		inMemoryToDoList.CreateToDoItem("heres a to do", ids)
-// 		req, err := http.NewRequest("GET", "/todo", nil)
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-// 		req.Header.Set("Content-Type", "application/json")
-// 		got := httptest.NewRecorder()
-// 		HandleListToDos(got, req)
-// 		want := 200
-// 		if got.Code != want {
-// 			t.Errorf("wanted %d got %v", want, got.Code)
-// 		}
-// 		//fix this
-// 		wantString := "{\"0\":{\"Description\":\"heres a to do\",\"Completed\":false}}"
-// 		if got.Body.String() != wantString {
-// 			t.Errorf("wanted %s got %s", wantString, got.Body.String())
-// 		}
-// 	})
-// }
+		var responseBody ToDoResponse
+		json.NewDecoder(got.Body).Decode(&responseBody)
+
+		wantBody := ToDoResponse{}
+
+		if !reflect.DeepEqual(responseBody, wantBody) {
+			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
+		}
+	})
+
+	t.Run("returns the list", func(t *testing.T) {
+
+		inMemoryToDoList.CreateToDoItem("heres a to do", ids)
+		req, err := http.NewRequest("GET", "/todo", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Content-Type", "application/json")
+		got := httptest.NewRecorder()
+		HandleListToDos(got, req)
+
+		assertStatus(t, got.Code, 200)
+
+		var responseBody types.ToDoList
+		json.NewDecoder(got.Body).Decode(&responseBody)
+
+		fmt.Println(responseBody)
+
+		wantBody := types.ToDo{Description: "heres a to do", Completed: false}
+
+		if !reflect.DeepEqual(responseBody["0"], wantBody) {
+			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
+		}
+	})
+}
