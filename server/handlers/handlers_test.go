@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -124,12 +123,11 @@ func TestHandleListToDos(t *testing.T) {
 	})
 
 	t.Run("returns the list", func(t *testing.T) {
-
+		inMemoryToDoList = types.NewToDoList()
+		ids = types.NewCounter()
 		inMemoryToDoList.CreateToDoItem("heres a to do", ids)
-		req, err := http.NewRequest("GET", "/todo", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+		req, _ := http.NewRequest("GET", "/todo", nil)
+
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
 		HandleListToDos(got, req)
@@ -138,8 +136,6 @@ func TestHandleListToDos(t *testing.T) {
 
 		var responseBody types.ToDoList
 		json.NewDecoder(got.Body).Decode(&responseBody)
-
-		fmt.Println(responseBody)
 
 		wantBody := types.ToDo{Description: "heres a to do", Completed: false}
 

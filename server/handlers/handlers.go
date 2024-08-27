@@ -26,17 +26,18 @@ func HandleCreateNewToDo(res http.ResponseWriter, req *http.Request) {
 
 	json.NewDecoder(req.Body).Decode(&toDo)
 
-	if len(toDo.Description) != 0 {
-		newItemKey := inMemoryToDoList.CreateToDoItem(toDo.Description, ids)
-
-		resBody := ToDoResponse{newItemKey, toDo.Description, false}
-
-		res.Header().Set("Content-Type", "application/json")
-		res.WriteHeader(201)
-		json.NewEncoder(res).Encode(resBody)
-	} else {
+	if len(toDo.Description) == 0 {
 		http.Error(res, "Invalid Request", 400)
+		return
 	}
+	newItemKey := inMemoryToDoList.CreateToDoItem(toDo.Description, ids)
+
+	resBody := ToDoResponse{newItemKey, toDo.Description, false}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(201)
+	json.NewEncoder(res).Encode(resBody)
+
 }
 
 func HandleListToDos(res http.ResponseWriter, req *http.Request) {
@@ -53,16 +54,16 @@ func HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
 
 	err := inMemoryToDoList.UpdateToDoItemStatus(id)
 
-	if err == nil {
-		updatedToDo := inMemoryToDoList.GetSingleToDo(id)
-		responseBody := ToDoResponse{id, updatedToDo.Description, updatedToDo.Completed}
-
-		res.Header().Set("Content-Type", "application/json")
-		res.WriteHeader(200)
-		json.NewEncoder(res).Encode(responseBody)
-	} else {
+	if err != nil {
 		http.Error(res, err.Error(), 400)
+		return
 	}
+	updatedToDo := inMemoryToDoList.GetSingleToDo(id)
+	responseBody := ToDoResponse{id, updatedToDo.Description, updatedToDo.Completed}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(200)
+	json.NewEncoder(res).Encode(responseBody)
 }
 
 func HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
@@ -71,15 +72,15 @@ func HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 
 	err := inMemoryToDoList.DeleteToDoItem(id)
 
-	if err == nil {
-		responseBody := fmt.Sprintf("todo: %s deleted", id)
-
-		res.Header().Set("Content-Type", "application/json")
-		res.WriteHeader(200)
-		json.NewEncoder(res).Encode(responseBody)
-	} else {
+	if err != nil {
 		http.Error(res, err.Error(), 400)
+		return
 	}
+	responseBody := fmt.Sprintf("todo: %s deleted", id)
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(200)
+	json.NewEncoder(res).Encode(responseBody)
 
 }
 
