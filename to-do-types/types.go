@@ -58,36 +58,36 @@ func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCou
 
 }
 
-func (list *ToDoListContainer) UpdateToDoItemStatus(id string) error {
-	list.lock.Lock()
+func (list *ToDoListContainer) UpdateToDoItemStatus(id string) (toDo ToDo, err error) {
+	// list.lock.Lock()
+	// defer list.lock.Unlock()
 
 	itemToUpdate, ok := list.list[id]
 
 	if !ok {
-		return errors.New("item doesn't exist")
+		return ToDo{}, errors.New("item doesn't exist")
 	}
 
 	itemToUpdate.Completed = !itemToUpdate.Completed
 
 	list.list[id] = itemToUpdate
 
-	list.lock.Unlock()
-	return nil
+	return itemToUpdate, nil
 }
 
-func (list *ToDoListContainer) DeleteToDoItem(id string) error {
+func (list *ToDoListContainer) DeleteToDoItem(id string) (deleted bool, err error) {
 	list.lock.Lock()
+	defer list.lock.Unlock()
 
 	_, ok := list.list[id]
 
 	if !ok {
-		return errors.New("item doesn't exist")
+		return false, errors.New("item doesn't exist")
 	}
 
 	delete(list.list, id)
 
-	list.lock.Unlock()
-	return nil
+	return true, nil
 }
 
 type IdCounter struct {

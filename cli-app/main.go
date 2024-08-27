@@ -25,7 +25,7 @@ func UpdateToDoStatus(list *types.ToDoListContainer, ids *types.IdCounter, scann
 	fmt.Println("\nwhich task do you want to update?:")
 	scanner.Scan()
 	input := scanner.Text()
-	err := list.UpdateToDoItemStatus(input)
+	_, err := list.UpdateToDoItemStatus(input)
 	if err != nil {
 		fmt.Printf("\n%v\n", err)
 	} else {
@@ -37,7 +37,7 @@ func DeleteToDo(list *types.ToDoListContainer, ids *types.IdCounter, scanner *bu
 	fmt.Println("\nwhich task do you want to delete?:")
 	scanner.Scan()
 	input := scanner.Text()
-	err := list.DeleteToDoItem(input)
+	_, err := list.DeleteToDoItem(input)
 
 	if err != nil {
 		fmt.Printf("\n%v\n", err)

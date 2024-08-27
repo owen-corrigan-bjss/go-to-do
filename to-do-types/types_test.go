@@ -92,22 +92,22 @@ func TestUpdateToDoItemStatus(t *testing.T) {
 		toDos.list["1"] = ToDo{"this is item 1", false}
 		toDos.list["2"] = ToDo{"this is item 2", false}
 
-		err := toDos.UpdateToDoItemStatus("3")
+		_, err := toDos.UpdateToDoItemStatus("3")
 
 		if err == nil {
 			t.Errorf("wanted error but got nil")
 		}
 	})
 
-	t.Run("will return nil if the item exists", func(t *testing.T) {
+	t.Run("will return updated item if it exists", func(t *testing.T) {
 		toDos := NewToDoList()
 		toDos.list["1"] = ToDo{"this is item 1", false}
 		toDos.list["2"] = ToDo{"this is item 2", false}
 
-		err := toDos.UpdateToDoItemStatus("2")
+		toDo, _ := toDos.UpdateToDoItemStatus("2")
 
-		if err != nil {
-			t.Errorf("wanted an nil but got %v", err)
+		if !toDo.Completed {
+			t.Errorf("wanted an %t but got %t", true, toDo.Completed)
 		}
 	})
 
@@ -132,7 +132,7 @@ func TestDeleteToDoItemDesc(t *testing.T) {
 		toDos.list["1"] = ToDo{"this is item 1", false}
 		toDos.list["2"] = ToDo{"this is item 2", false}
 
-		err := toDos.DeleteToDoItem("3")
+		_, err := toDos.DeleteToDoItem("3")
 
 		if err == nil {
 			t.Errorf("wanted error but got nil")
@@ -144,7 +144,7 @@ func TestDeleteToDoItemDesc(t *testing.T) {
 		toDos.list["1"] = ToDo{"this is item 1", false}
 		toDos.list["2"] = ToDo{"this is item 2", false}
 
-		err := toDos.DeleteToDoItem("2")
+		_, err := toDos.DeleteToDoItem("2")
 
 		if err != nil {
 			t.Errorf("wanted an nil but got %v", err)

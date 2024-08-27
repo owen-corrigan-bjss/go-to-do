@@ -18,7 +18,10 @@ func assertStatus(t testing.TB, got, want int) {
 	}
 }
 
+// server := NewServer()
+
 func TestHandleCreateNewToDo(t *testing.T) {
+	server := NewServer()
 	t.Run("Creates a new todo and returns the newly created item", func(t *testing.T) {
 		validData := []byte(`{"description": "a test task"}`)
 		req, err := http.NewRequest("POST", "/create", bytes.NewBuffer(validData))
@@ -27,16 +30,16 @@ func TestHandleCreateNewToDo(t *testing.T) {
 		}
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleCreateNewToDo(got, req)
+		server.HandleCreateNewToDo(got, req)
 
 		assertStatus(t, got.Code, 201)
 
-		var responseBody ToDoResponse
+		var responseBody types.ToDoList
 		json.NewDecoder(got.Body).Decode(&responseBody)
 
-		wantBody := ToDoResponse{"0", "a test task", false}
+		wantBody := types.ToDo{Description: "a test task", Completed: false}
 
-		if !reflect.DeepEqual(responseBody, wantBody) {
+		if !reflect.DeepEqual(responseBody["0"], wantBody) {
 			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
 		}
 
@@ -46,13 +49,14 @@ func TestHandleCreateNewToDo(t *testing.T) {
 		req, _ := http.NewRequest("POST", "/create", bytes.NewBuffer(validData))
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleCreateNewToDo(got, req)
+		server.HandleCreateNewToDo(got, req)
 
 		assertStatus(t, got.Code, 400)
 	})
 }
 
 func TestHandleUpdateToDo(t *testing.T) {
+	server := NewServer()
 	t.Run("will update a todo", func(t *testing.T) {
 		inMemoryToDoList = types.NewToDoList()
 		ids = types.NewCounter()
@@ -60,7 +64,7 @@ func TestHandleUpdateToDo(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "/update?id=0", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleUpdateToDo(got, req)
+		server.HandleUpdateToDo(got, req)
 
 		assertStatus(t, got.Code, 200)
 
@@ -74,13 +78,14 @@ func TestHandleUpdateToDo(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "/update?id=10", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleUpdateToDo(got, req)
+		server.HandleUpdateToDo(got, req)
 
 		assertStatus(t, got.Code, 400)
 	})
 }
 
 func TestHandleDeleteToDo(t *testing.T) {
+	server := NewServer()
 	t.Run("will delete a todo", func(t *testing.T) {
 		inMemoryToDoList = types.NewToDoList()
 		ids = types.NewCounter()
@@ -88,7 +93,7 @@ func TestHandleDeleteToDo(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/remove?id=0", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleDeleteToDo(got, req)
+		server.HandleDeleteToDo(got, req)
 
 		assertStatus(t, got.Code, 200)
 	})
@@ -96,19 +101,20 @@ func TestHandleDeleteToDo(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "/update?id=10", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleDeleteToDo(got, req)
+		server.HandleDeleteToDo(got, req)
 
 		assertStatus(t, got.Code, 400)
 	})
 }
 
 func TestHandleListToDos(t *testing.T) {
+	server := NewServer()
 	t.Run("If there is nothing in the list returns an empty list", func(t *testing.T) {
 		request, _ := http.NewRequest("GET", "/todos", nil)
 
 		request.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleListToDos(got, request)
+		server.HandleListToDos(got, request)
 
 		assertStatus(t, got.Code, 200)
 
@@ -130,7 +136,7 @@ func TestHandleListToDos(t *testing.T) {
 
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
-		HandleListToDos(got, req)
+		server.HandleListToDos(got, req)
 
 		assertStatus(t, got.Code, 200)
 
