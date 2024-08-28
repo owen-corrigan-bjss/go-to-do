@@ -52,6 +52,58 @@ func TestCreateToDoItem(t *testing.T) {
 	})
 }
 
+func TestGetSingleToDoItem(t *testing.T) {
+	t.Run("will return an error if the item doesn't exist", func(t *testing.T) {
+		toDos := NewToDoList()
+
+		_, err := toDos.GetSingleToDo("1")
+		want := "to do doesn't exist"
+
+		if err.Error() != want {
+			t.Errorf("wanted %s but got %s", want, err.Error())
+		}
+	})
+
+	t.Run("will return a single to do if it exists", func(t *testing.T) {
+		toDos := NewToDoList()
+		ids := NewCounter()
+		toDos.CreateToDoItem("this is item 1", ids)
+		toDos.CreateToDoItem("this is item 2", ids)
+
+		got, _ := toDos.GetSingleToDo("1")
+		want := "this is item 2"
+
+		if got.Description != want {
+			t.Errorf("wanted %s but got %s", want, got.Description)
+		}
+	})
+}
+
+func TestGetToDoMap(t *testing.T) {
+	t.Run("will return an empty list if theres nothing in it", func(t *testing.T) {
+		toDos := NewToDoList()
+
+		get := toDos.GetToDoMap()
+
+		if len(get) != 0 {
+			t.Errorf("wanted %d but got %d", len(get), 0)
+		}
+	})
+
+	t.Run("will return a single to do if it exists", func(t *testing.T) {
+		toDos := NewToDoList()
+		ids := NewCounter()
+		toDos.CreateToDoItem("this is item 1", ids)
+		toDos.CreateToDoItem("this is item 2", ids)
+
+		got := toDos.GetToDoMap()
+
+		if len(got) != 2 {
+			t.Errorf("wanted %d but got %d", len(got), 2)
+		}
+	})
+}
+
 func TestUpdateToDoItemStatus(t *testing.T) {
 	t.Run("will update an item in the list to be complete", func(t *testing.T) {
 		toDos := NewToDoList()

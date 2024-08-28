@@ -3,14 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
+	"github.com/owen-corrigan-bjss/to-do-app/server/dataService"
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
 )
-
-var inMemoryToDoList = types.NewToDoList()
-var ids = types.NewCounter()
 
 type ToDoReq struct {
 	Description string `json:"description"`
@@ -22,30 +19,13 @@ type ToDoResponse struct {
 	Status      bool
 }
 
-type CommandType int
-
-const (
-	GetCommand = iota
-	PostCommand
-	UpdateCommand
-	DeleteCommand
-)
-
-type Request struct {
-	reqType     CommandType
-	description string
-	id          string
-	replyChan   chan types.ToDoList
-	errorChan   chan error
-}
-
 type Server struct {
-	requests chan<- Request
+	requests chan<- dataService.Request
 }
 
 func NewServer() *Server {
 	server := Server{}
-	server.requests = startDataManager()
+	server.requests = dataService.StartDataManager()
 	http.HandleFunc("POST /create", server.HandleCreateNewToDo)
 	http.HandleFunc("GET /todos", server.HandleListToDos)
 	http.HandleFunc("PUT /update", server.HandleUpdateToDo)
@@ -66,7 +46,10 @@ func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request)
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
 
-	s.requests <- Request{PostCommand, toDo.Description, "", replyChan, errorChan}
+	defer close(replyChan)
+	defer close(errorChan)
+
+	s.requests <- dataService.Request{ReqType: dataService.PostCommand, Description: toDo.Description, Id: "", ReplyChan: replyChan, ErrorChan: errorChan}
 
 	responseBody := <-replyChan
 	res.Header().Set("Content-Type", "application/json")
@@ -78,8 +61,10 @@ func (s *Server) HandleListToDos(res http.ResponseWriter, req *http.Request) {
 
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
+	defer close(replyChan)
+	defer close(errorChan)
 
-	s.requests <- Request{GetCommand, "", "", replyChan, errorChan}
+	s.requests <- dataService.Request{ReqType: dataService.GetCommand, Description: "", Id: "", ReplyChan: replyChan, ErrorChan: errorChan}
 
 	responseBody := <-replyChan
 	res.Header().Set("Content-Type", "application/json")
@@ -99,8 +84,10 @@ func (s *Server) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
 
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
+	defer close(replyChan)
+	defer close(errorChan)
 
-	s.requests <- Request{UpdateCommand, "", id, replyChan, errorChan}
+	s.requests <- dataService.Request{ReqType: dataService.UpdateCommand, Description: "", Id: id, ReplyChan: replyChan, ErrorChan: errorChan}
 
 	select {
 	case err := <-errorChan:
@@ -118,8 +105,10 @@ func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
+	defer close(replyChan)
+	defer close(errorChan)
 
-	s.requests <- Request{DeleteCommand, "", id, replyChan, errorChan}
+	s.requests <- dataService.Request{ReqType: dataService.DeleteCommand, Description: "", Id: id, ReplyChan: replyChan, ErrorChan: errorChan}
 
 	select {
 	case err := <-errorChan:
@@ -131,53 +120,4 @@ func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(responseBody)
 	}
 
-}
-
-func startDataManager() chan<- Request {
-	requests := make(chan Request)
-	go func() {
-		for req := range requests {
-			switch req.reqType {
-			case GetCommand:
-				list := inMemoryToDoList.GetToDoMap()
-
-				req.replyChan <- list
-
-			case PostCommand:
-				key := inMemoryToDoList.CreateToDoItem(req.description, ids)
-
-				list := make(map[string]types.ToDo)
-				list[key] = types.ToDo{Description: req.description, Completed: false}
-
-				req.replyChan <- list
-
-			case UpdateCommand:
-				toDo, err := inMemoryToDoList.UpdateToDoItemStatus(req.id)
-
-				if err != nil {
-					req.errorChan <- err
-				} else {
-					list := make(map[string]types.ToDo)
-
-					list[req.id] = toDo
-
-					req.replyChan <- list
-				}
-
-			case DeleteCommand:
-				_, err := inMemoryToDoList.DeleteToDoItem(req.id)
-
-				if err != nil {
-					req.errorChan <- err
-				} else {
-					list := make(map[string]types.ToDo)
-					list[req.id] = types.ToDo{}
-					req.replyChan <- list
-				}
-			default:
-				log.Fatal("unknown command type", req.reqType)
-			}
-		}
-	}()
-	return requests
 }

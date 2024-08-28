@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -18,10 +19,9 @@ func assertStatus(t testing.TB, got, want int) {
 	}
 }
 
-// server := NewServer()
+var server *Server = NewServer()
 
 func TestHandleCreateNewToDo(t *testing.T) {
-	server := NewServer()
 	t.Run("Creates a new todo and returns the newly created item", func(t *testing.T) {
 		validData := []byte(`{"description": "a test task"}`)
 		req, err := http.NewRequest("POST", "/create", bytes.NewBuffer(validData))
@@ -55,12 +55,30 @@ func TestHandleCreateNewToDo(t *testing.T) {
 	})
 }
 
+func TestHandleListToDos(t *testing.T) {
+	t.Run("returns the list", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/todo", nil)
+
+		req.Header.Set("Content-Type", "application/json")
+		got := httptest.NewRecorder()
+		server.HandleListToDos(got, req)
+
+		assertStatus(t, got.Code, 200)
+
+		var responseBody types.ToDoList
+		json.NewDecoder(got.Result().Body).Decode(&responseBody)
+		fmt.Println("got:", got)
+
+		wantBody := types.ToDo{Description: "a test task", Completed: false}
+
+		if !reflect.DeepEqual(responseBody["0"], wantBody) {
+			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
+		}
+	})
+}
+
 func TestHandleUpdateToDo(t *testing.T) {
-	server := NewServer()
 	t.Run("will update a todo", func(t *testing.T) {
-		inMemoryToDoList = types.NewToDoList()
-		ids = types.NewCounter()
-		inMemoryToDoList.CreateToDoItem("test to do", ids)
 		req, _ := http.NewRequest("PUT", "/update?id=0", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
@@ -68,10 +86,13 @@ func TestHandleUpdateToDo(t *testing.T) {
 
 		assertStatus(t, got.Code, 200)
 
-		updatedItemStatus := inMemoryToDoList.GetSingleToDo("0").Completed
+		var responseBody types.ToDoList
+		json.NewDecoder(got.Result().Body).Decode(&responseBody)
 
-		if updatedItemStatus != true {
-			t.Errorf("wanted %t for %t", true, updatedItemStatus)
+		wantBody := types.ToDo{Description: "a test task", Completed: true}
+
+		if !reflect.DeepEqual(responseBody["0"], wantBody) {
+			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
 		}
 	})
 	t.Run("will return an error if the item doesn't exist", func(t *testing.T) {
@@ -85,11 +106,7 @@ func TestHandleUpdateToDo(t *testing.T) {
 }
 
 func TestHandleDeleteToDo(t *testing.T) {
-	server := NewServer()
 	t.Run("will delete a todo", func(t *testing.T) {
-		inMemoryToDoList = types.NewToDoList()
-		ids = types.NewCounter()
-		inMemoryToDoList.CreateToDoItem("test to do", ids)
 		req, _ := http.NewRequest("DELETE", "/remove?id=0", nil)
 		req.Header.Set("Content-Type", "application/json")
 		got := httptest.NewRecorder()
@@ -104,49 +121,5 @@ func TestHandleDeleteToDo(t *testing.T) {
 		server.HandleDeleteToDo(got, req)
 
 		assertStatus(t, got.Code, 400)
-	})
-}
-
-func TestHandleListToDos(t *testing.T) {
-	server := NewServer()
-	t.Run("If there is nothing in the list returns an empty list", func(t *testing.T) {
-		request, _ := http.NewRequest("GET", "/todos", nil)
-
-		request.Header.Set("Content-Type", "application/json")
-		got := httptest.NewRecorder()
-		server.HandleListToDos(got, request)
-
-		assertStatus(t, got.Code, 200)
-
-		var responseBody ToDoResponse
-		json.NewDecoder(got.Body).Decode(&responseBody)
-
-		wantBody := ToDoResponse{}
-
-		if !reflect.DeepEqual(responseBody, wantBody) {
-			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
-		}
-	})
-
-	t.Run("returns the list", func(t *testing.T) {
-		inMemoryToDoList = types.NewToDoList()
-		ids = types.NewCounter()
-		inMemoryToDoList.CreateToDoItem("heres a to do", ids)
-		req, _ := http.NewRequest("GET", "/todo", nil)
-
-		req.Header.Set("Content-Type", "application/json")
-		got := httptest.NewRecorder()
-		server.HandleListToDos(got, req)
-
-		assertStatus(t, got.Code, 200)
-
-		var responseBody types.ToDoList
-		json.NewDecoder(got.Body).Decode(&responseBody)
-
-		wantBody := types.ToDo{Description: "heres a to do", Completed: false}
-
-		if !reflect.DeepEqual(responseBody["0"], wantBody) {
-			t.Errorf("wanted %v got %v", wantBody, got.Body.String())
-		}
 	})
 }

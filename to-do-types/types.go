@@ -38,8 +38,12 @@ func (list *ToDoListContainer) ListToDos() string {
 	return toDoListToPrint
 }
 
-func (list *ToDoListContainer) GetSingleToDo(id string) ToDo {
-	return list.list[id]
+func (list *ToDoListContainer) GetSingleToDo(id string) (toDo ToDo, err error) {
+	toDo, ok := list.list[id]
+	if !ok {
+		return ToDo{}, errors.New("to do doesn't exist")
+	}
+	return toDo, nil
 }
 
 func (list *ToDoListContainer) GetToDoMap() ToDoList {
@@ -59,8 +63,8 @@ func (list *ToDoListContainer) CreateToDoItem(description string, counter *IdCou
 }
 
 func (list *ToDoListContainer) UpdateToDoItemStatus(id string) (toDo ToDo, err error) {
-	// list.lock.Lock()
-	// defer list.lock.Unlock()
+	list.lock.Lock()
+	defer list.lock.Unlock()
 
 	itemToUpdate, ok := list.list[id]
 
