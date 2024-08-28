@@ -41,7 +41,7 @@ func (list *ToDoListContainer) ListToDos() string {
 func (list *ToDoListContainer) GetSingleToDo(id string) (toDo ToDo, err error) {
 	toDo, ok := list.list[id]
 	if !ok {
-		return ToDo{}, errors.New("to do doesn't exist")
+		return ToDo{}, errors.New("todo not found")
 	}
 	return toDo, nil
 }

@@ -27,7 +27,8 @@ func NewServer() *Server {
 	server := Server{}
 	server.requests = dataService.StartDataManager()
 	http.HandleFunc("POST /create", server.HandleCreateNewToDo)
-	http.HandleFunc("GET /todos", server.HandleListToDos)
+	http.HandleFunc("GET /todo-list", server.HandleListToDos)
+	http.HandleFunc("GET /todo", server.HandleGetSingleToDo)
 	http.HandleFunc("PUT /update", server.HandleUpdateToDo)
 	http.HandleFunc("DELETE /remove", server.HandleDeleteToDo)
 	return &server
@@ -120,4 +121,25 @@ func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(responseBody)
 	}
 
+}
+
+func (s *Server) HandleGetSingleToDo(res http.ResponseWriter, req *http.Request) {
+	query := req.URL.Query()
+	id := query.Get("id")
+
+	replyChan := make(chan types.ToDoList)
+	errorChan := make(chan error)
+	defer close(replyChan)
+	defer close(errorChan)
+
+	s.requests <- dataService.Request{ReqType: dataService.GetSingleCommand, Description: "", Id: id, ReplyChan: replyChan, ErrorChan: errorChan}
+
+	select {
+	case err := <-errorChan:
+		http.Error(res, err.Error(), 404)
+	case responseBody := <-replyChan:
+		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(200)
+		json.NewEncoder(res).Encode(responseBody)
+	}
 }

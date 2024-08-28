@@ -16,6 +16,7 @@ const (
 	PostCommand
 	UpdateCommand
 	DeleteCommand
+	GetSingleCommand
 )
 
 type Request struct {
@@ -67,6 +68,19 @@ func StartDataManager() chan<- Request {
 					list[req.Id] = types.ToDo{}
 					req.ReplyChan <- list
 				}
+			case GetSingleCommand:
+				toDo, err := inMemoryToDoList.GetSingleToDo(req.Id)
+
+				if err != nil {
+					req.ErrorChan <- err
+				} else {
+					list := make(map[string]types.ToDo)
+
+					list[req.Id] = toDo
+
+					req.ReplyChan <- list
+				}
+
 			default:
 				log.Fatal("unknown command type", req.ReqType)
 			}

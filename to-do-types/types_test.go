@@ -57,7 +57,7 @@ func TestGetSingleToDoItem(t *testing.T) {
 		toDos := NewToDoList()
 
 		_, err := toDos.GetSingleToDo("1")
-		want := "to do doesn't exist"
+		want := "todo not found"
 
 		if err.Error() != want {
 			t.Errorf("wanted %s but got %s", want, err.Error())
