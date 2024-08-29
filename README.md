@@ -10,7 +10,7 @@ go run main.go
 ## To start the API:
 
 ```
-cd server 
+cd web-app 
 
 go run main.go
 ```

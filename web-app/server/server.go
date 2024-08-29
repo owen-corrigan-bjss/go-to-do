@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/owen-corrigan-bjss/to-do-app/server/dataService"
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
+	"github.com/owen-corrigan-bjss/to-do-app/web-app/dataService"
 )
 
 type ToDoReq struct {

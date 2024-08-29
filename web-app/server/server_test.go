@@ -123,3 +123,14 @@ func TestHandleDeleteToDo(t *testing.T) {
 		assertStatus(t, got.Code, 400)
 	})
 }
+
+func BenchmarkCreateToDo(b *testing.B) {
+	for range b.N {
+		validData := []byte(`{"description": "a test task"}`)
+		req, _ := http.NewRequest("POST", "/create", bytes.NewBuffer(validData))
+
+		req.Header.Set("Content-Type", "application/json")
+		got := httptest.NewRecorder()
+		server.HandleCreateNewToDo(got, req)
+	}
+}
