@@ -1,8 +1,9 @@
-package handlers
+package server
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
@@ -31,6 +32,8 @@ func NewServer() *Server {
 	http.HandleFunc("GET /todo", server.HandleGetSingleToDo)
 	http.HandleFunc("PUT /update", server.HandleUpdateToDo)
 	http.HandleFunc("DELETE /remove", server.HandleDeleteToDo)
+	fmt.Println("Server is running at http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 	return &server
 }
 
