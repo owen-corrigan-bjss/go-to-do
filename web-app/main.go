@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	server "github.com/owen-corrigan-bjss/to-do-app/server/server"
+	server "github.com/owen-corrigan-bjss/to-do-app/web-app/server"
 )
 
 func main() {
