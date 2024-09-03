@@ -23,19 +23,33 @@ type Server struct {
 	requests chan<- dataService.Request
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Content-Type", "application/json")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, DELETE, PUT")
+	(*w).Header().Set("Access-Control-Allow-Headers", "content-type")
+}
+
 func NewServer() *Server {
 	server := Server{}
 	server.requests = dataService.StartDataManager()
 	http.HandleFunc("POST /create", server.HandleCreateNewToDo)
+	http.HandleFunc("OPTIONS /create", server.HandleOptions)
 	http.HandleFunc("GET /todo-list", server.HandleListToDos)
 	http.HandleFunc("GET /todo", server.HandleGetSingleToDo)
 	http.HandleFunc("PUT /update", server.HandleUpdateToDo)
+	http.HandleFunc("OPTIONS /update", server.HandleOptions)
 	http.HandleFunc("DELETE /remove", server.HandleDeleteToDo)
+	http.HandleFunc("OPTIONS /remove", server.HandleOptions)
 	return &server
 }
 
-func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request) {
+func (s *Server) HandleOptions(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
+}
 
+func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	var toDo ToDoReq
 	json.NewDecoder(req.Body).Decode(&toDo)
 
@@ -59,7 +73,7 @@ func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request)
 }
 
 func (s *Server) HandleListToDos(res http.ResponseWriter, req *http.Request) {
-
+	enableCors(&res)
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
 	defer close(replyChan)
@@ -75,6 +89,7 @@ func (s *Server) HandleListToDos(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
 
@@ -101,6 +116,7 @@ func (s *Server) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
 
@@ -124,6 +140,7 @@ func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) HandleGetSingleToDo(res http.ResponseWriter, req *http.Request) {
+	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
 
