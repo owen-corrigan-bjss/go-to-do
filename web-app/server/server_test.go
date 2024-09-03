@@ -124,15 +124,37 @@ func TestHandleDeleteToDo(t *testing.T) {
 	})
 }
 
-func BenchmarkCreateToDo(b *testing.B) {
+func BenchmarkHandlers(b *testing.B) {
 	for range b.N {
-		b.Run("", func(b *testing.B) {
+		b.Run("create single todo", func(b *testing.B) {
 			validData := []byte(`{"description": "a test task"}`)
 			req, _ := http.NewRequest("POST", "/create", bytes.NewBuffer(validData))
 
 			req.Header.Set("Content-Type", "application/json")
 			got := httptest.NewRecorder()
 			server.HandleCreateNewToDo(got, req)
+		})
+	}
+}
+
+func BenchmarkGetListOfToDos(b *testing.B) {
+	for range b.N {
+		b.Run("", func(b *testing.B) {
+			req, _ := http.NewRequest("GET", "/todo-list", nil)
+			req.Header.Set("Content-Type", "application/json")
+			got := httptest.NewRecorder()
+			server.HandleListToDos(got, req)
+		})
+	}
+}
+
+func BenchmarkGetSingleToDo(b *testing.B) {
+	for range b.N {
+		b.Run("", func(b *testing.B) {
+			req, _ := http.NewRequest("GET", "/todo?id=0", nil)
+			req.Header.Set("Content-Type", "application/json")
+			got := httptest.NewRecorder()
+			server.HandleGetSingleToDo(got, req)
 		})
 	}
 }
