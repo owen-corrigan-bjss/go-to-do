@@ -1,4 +1,4 @@
-package server
+package handlers
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type ToDoResponse struct {
 	Status      bool
 }
 
-type Server struct {
+type Handlers struct {
 	requests chan<- dataService.Request
 }
 
@@ -30,25 +30,25 @@ func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Headers", "content-type")
 }
 
-func NewServer() *Server {
-	server := Server{}
-	server.requests = dataService.StartDataManager()
-	http.HandleFunc("POST /create", server.HandleCreateNewToDo)
-	http.HandleFunc("OPTIONS /create", server.HandleOptions)
-	http.HandleFunc("GET /todo-list", server.HandleListToDos)
-	http.HandleFunc("GET /todo", server.HandleGetSingleToDo)
-	http.HandleFunc("PUT /update", server.HandleUpdateToDo)
-	http.HandleFunc("OPTIONS /update", server.HandleOptions)
-	http.HandleFunc("DELETE /remove", server.HandleDeleteToDo)
-	http.HandleFunc("OPTIONS /remove", server.HandleOptions)
-	return &server
+func NewHandlers() *Handlers {
+	handlers := Handlers{}
+	handlers.requests = dataService.StartDataManager()
+	http.HandleFunc("POST /create", handlers.HandleCreateNewToDo)
+	http.HandleFunc("OPTIONS /create", handlers.HandleOptions)
+	http.HandleFunc("GET /todo-list", handlers.HandleListToDos)
+	http.HandleFunc("GET /todo", handlers.HandleGetSingleToDo)
+	http.HandleFunc("PUT /update", handlers.HandleUpdateToDo)
+	http.HandleFunc("OPTIONS /update", handlers.HandleOptions)
+	http.HandleFunc("DELETE /remove", handlers.HandleDeleteToDo)
+	http.HandleFunc("OPTIONS /remove", handlers.HandleOptions)
+	return &handlers
 }
 
-func (s *Server) HandleOptions(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleOptions(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 }
 
-func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 	var toDo ToDoReq
 	json.NewDecoder(req.Body).Decode(&toDo)
@@ -72,7 +72,7 @@ func (s *Server) HandleCreateNewToDo(res http.ResponseWriter, req *http.Request)
 	json.NewEncoder(res).Encode(responseBody)
 }
 
-func (s *Server) HandleListToDos(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleListToDos(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 	replyChan := make(chan types.ToDoList)
 	errorChan := make(chan error)
@@ -88,7 +88,7 @@ func (s *Server) HandleListToDos(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func (s *Server) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
@@ -115,7 +115,7 @@ func (s *Server) HandleUpdateToDo(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
@@ -139,7 +139,7 @@ func (s *Server) HandleDeleteToDo(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func (s *Server) HandleGetSingleToDo(res http.ResponseWriter, req *http.Request) {
+func (s *Handlers) HandleGetSingleToDo(res http.ResponseWriter, req *http.Request) {
 	enableCors(&res)
 	query := req.URL.Query()
 	id := query.Get("id")
