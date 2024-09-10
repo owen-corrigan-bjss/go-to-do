@@ -1,90 +1,59 @@
 package dataService
 
 import (
-	"log"
-
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
 )
 
-var inMemoryToDoList = types.NewToDoList()
-var ids = types.NewCounter()
-
-type CommandType int
-
-const (
-	GetCommand = iota
-	PostCommand
-	UpdateCommand
-	DeleteCommand
-	GetSingleCommand
-)
-
-type Request struct {
-	ReqType     CommandType
+type ToDo struct {
 	Description string
-	Id          string
-	ReplyChan   chan types.ToDoList
-	ErrorChan   chan error
+	Completed   bool
 }
 
-func StartDataManager() chan<- Request {
-	requests := make(chan Request)
-	go func() {
-		for req := range requests {
-			switch req.ReqType {
-			case GetCommand:
-				list := inMemoryToDoList.GetToDoMap()
+type DataStore interface {
+	ListToDos() string
+	GetSingleToDo(id string) (toDo ToDo, err error)
+	GetToDoMap() ToDoList
+	CreateToDoItem(description string, counter *types.IdCounter) string
+	UpdateToDoItemStatus(id string) (toDo ToDo, err error)
+	DeleteToDoItem(id string) (deleted bool, err error)
+}
 
-				req.ReplyChan <- list
+type DataStoreStruct struct {
+	inMemoryToDoList *types.ToDoListContainer
+	ids              *types.IdCounter
+}
 
-			case PostCommand:
-				key := inMemoryToDoList.CreateToDoItem(req.Description, ids)
+func NewDataStore() *DataStoreStruct {
+	ds := DataStoreStruct{}
+	ds.inMemoryToDoList = types.NewToDoList()
+	ds.ids = types.NewCounter()
+	return &ds
+}
 
-				list := make(map[string]types.ToDo)
-				list[key] = types.ToDo{Description: req.Description, Completed: false}
+type ToDoList map[string]ToDo
 
-				req.ReplyChan <- list
+func (ds *DataStoreStruct) ListToDos() string {
+	return ds.inMemoryToDoList.ListToDos()
+}
 
-			case UpdateCommand:
-				toDo, err := inMemoryToDoList.UpdateToDoItemStatus(req.Id)
+func (ds *DataStoreStruct) GetSingleToDo(id string) (toDo types.ToDo, err error) {
+	todo, err := ds.inMemoryToDoList.GetSingleToDo(id)
+	return todo, err
+}
 
-				if err != nil {
-					req.ErrorChan <- err
-				} else {
-					list := make(map[string]types.ToDo)
+func (ds *DataStoreStruct) GetToDoMap() types.ToDoList {
+	return ds.inMemoryToDoList.GetToDoMap()
+}
 
-					list[req.Id] = toDo
+func (ds *DataStoreStruct) CreateToDoItem(description string) string {
+	return ds.inMemoryToDoList.CreateToDoItem(description, ds.ids)
+}
 
-					req.ReplyChan <- list
-				}
+func (ds *DataStoreStruct) UpdateToDoItemStatus(id string) (toDo types.ToDo, err error) {
+	return ds.inMemoryToDoList.UpdateToDoItemStatus(id)
+}
 
-			case DeleteCommand:
-				_, err := inMemoryToDoList.DeleteToDoItem(req.Id)
-
-				if err != nil {
-					req.ErrorChan <- err
-				} else {
-					list := make(map[string]types.ToDo)
-					list[req.Id] = types.ToDo{}
-					req.ReplyChan <- list
-				}
-			case GetSingleCommand:
-				toDo, err := inMemoryToDoList.GetSingleToDo(req.Id)
-
-				if err != nil {
-					req.ErrorChan <- err
-				} else {
-					list := make(map[string]types.ToDo)
-
-					list[req.Id] = toDo
-
-					req.ReplyChan <- list
-				}
-
-			default:
-				log.Fatal("unknown command type", req.ReqType)
-			}
-		}
-	}()
-	return requests
+func (ds *DataStoreStruct) DeleteToDoItem(id string) (deleted bool, err error) {
+	del, err := ds.inMemoryToDoList.DeleteToDoItem(id)
+	return del, err
 }
