@@ -6,7 +6,7 @@ import (
 	types "github.com/owen-corrigan-bjss/to-do-app/to-do-types"
 )
 
-var ds *DataStoreStruct = NewDataStore()
+var dataService *DataStoreStruct = NewDataStore()
 
 type CommandType int
 
@@ -32,12 +32,12 @@ func StartDataManager() chan<- Request {
 		for req := range requests {
 			switch req.ReqType {
 			case GetCommand:
-				list := ds.GetToDoMap()
+				list := dataService.GetToDoMap()
 
 				req.ReplyChan <- list
 
 			case PostCommand:
-				key := ds.CreateToDoItem(req.Description)
+				key := dataService.CreateToDoItem(req.Description)
 
 				list := make(map[string]types.ToDo)
 				list[key] = types.ToDo{Description: req.Description, Completed: false}
@@ -45,7 +45,7 @@ func StartDataManager() chan<- Request {
 				req.ReplyChan <- list
 
 			case UpdateCommand:
-				toDo, err := ds.UpdateToDoItemStatus(req.Id)
+				toDo, err := dataService.UpdateToDoItemStatus(req.Id)
 
 				if err != nil {
 					req.ErrorChan <- err
@@ -58,7 +58,7 @@ func StartDataManager() chan<- Request {
 				}
 
 			case DeleteCommand:
-				_, err := ds.DeleteToDoItem(req.Id)
+				_, err := dataService.DeleteToDoItem(req.Id)
 
 				if err != nil {
 					req.ErrorChan <- err
@@ -68,7 +68,7 @@ func StartDataManager() chan<- Request {
 					req.ReplyChan <- list
 				}
 			case GetSingleCommand:
-				toDo, err := ds.GetSingleToDo(req.Id)
+				toDo, err := dataService.GetSingleToDo(req.Id)
 
 				if err != nil {
 					req.ErrorChan <- err
